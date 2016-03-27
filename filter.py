@@ -28,6 +28,9 @@ Where Type is of form:
 1 : Public
 2 : Private
 3 : Proprietary
+
+Y_Dependent and Y_Independent will be the total for the entire year if selected in Q6.
+Award_YTD_Total is always the sum of Y_Dependent + Y_Independent for each quarter.
 """
 import sqlite3
 
@@ -66,17 +69,19 @@ def help():
 # Shows a sum of independents and dependents, for each year, in the given state
 def stateOnly(state):
 	#try:
-	#TODO, actual query. Test only atm. Still need to sum of sum
+	
 	#Note: input to query is of form (state,) because that converts it to a
 	#tuple, which the execute function expects even w/1 arg.
-	cursor.execute("SELECT f.Year AS YEAR, s.Name AS name, SUM(f.Q_Dependent) AS allDependents, SUM(f.Q_Independent) as allIndependents FROM FAFSA_Data AS f INNER JOIN School S ON f.OPE_ID=S.OPE_ID AND S.State = ? GROUP BY Name,Year ORDER BY Year", (state,))
+	sqlStr = "SELECT f.Year AS YEAR, SUM(f.Y_Dependent) AS allDependents, SUM(f.Y_Independent) as allIndependents " + \
+		"FROM FAFSA_Data AS f INNER JOIN School S ON f.OPE_ID=S.OPE_ID AND Qtr='Q6' AND S.State = ? GROUP BY Year ORDER BY Year"
+	cursor.execute(sqlStr, (state,))
 	
 	cursorList = list(cursor)
 	for row in cursorList:
-		print(row)         
-	#except sqlite3.OperationalError, msg:
-     #   print( "Ran 'State %s' Message: %s" % (state,msg))
+		#TODO Better formatting.
+		print(row)
 
+		
 def main():
 	print("Welcome to filter.py!")
 	help()
@@ -86,6 +91,8 @@ def main():
 		if "State" in option:
 			state = option[6:]
 			stateOnly(state)
+
+		#TODO other commands
 
 		elif option == "Help":
 			help()

@@ -86,7 +86,8 @@ def stateOnly(state):
 	#Note: input to query is of form (state,) because that converts it to a
 	#tuple, which the execute function expects even w/1 arg.
 	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS + " " + SQL_JOIN_TABLES + \
-		+ SQL_Q6 + " AND s.State = ? GROUP BY Year ORDER BY Year"
+		SQL_Q6 + " AND s.State = ? GROUP BY Year ORDER BY Year"
+	#print("sqlStr: " + sqlStr)
 	cursor.execute(sqlStr, (state,))
 	
 	cursorTuples = list(cursor)

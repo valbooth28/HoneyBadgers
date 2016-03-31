@@ -13,7 +13,7 @@ State char(2)
 Zip char(10)
 Type int
 
-FAFSA_DATA
+FAFSA_Data
 OPE_ID int pkey
 Year int pkey
 Qtr varchar(2) pkey
@@ -31,6 +31,8 @@ Where Type is of form:
 
 Y_Dependent and Y_Independent will be the total for the entire year if selected in Q6.
 Award_YTD_Total is always the sum of Y_Dependent + Y_Independent for each quarter.
+
+NOTE: For Testing, RIT's OPE_ID = 280600
 """
 import sqlite3
 
@@ -74,6 +76,14 @@ def help():
 	print("across each school type for each year.")
 	print("")
 
+
+	print("'Qtr Years Q' will show you the breakdown of independents and dependents")
+	print("for Quarter #Q in each year where that data is available")
+	print("")
+
+	print("'Total' will show you the total sum of dependents and independents in")
+	print("in each available for full year.")
+	print("")
 	#TODO more filtering
 
 	print("'Exit' will exit the program.")
@@ -96,6 +106,20 @@ def stateOnly(state):
 		print(row)
 
 
+def qtrYears(Qtr):
+	qtrStr = "Q" + Qtr
+	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS + " " + SQL_JOIN_TABLES + \
+		" AND Qtr= ? GROUP BY Year, Qtr ORDER BY Year"
+	#print(sqlStr)
+	cursor.execute(sqlStr, (qtrStr,))
+	
+	cursorTuples = list(cursor)
+	for row in cursorTuples:
+		#TODO Better formatting.
+		print(row)
+
+
+
 
 #Shows the number of independent and dependent students for every school type,
 #Private, public, proprietary, in the given year.
@@ -112,6 +136,17 @@ def typePerYear():
 		row[1] = typeLookup[row[1]]
 		print(row)
 
+
+def total():
+	sqlStr = "SELECT f.Year, " + SQL_SUM_STUDENTS + SQL_JOIN_TABLES +\
+		SQL_Q6 + " GROUP BY Year ORDER BY Year"
+	#print(sqlStr)
+	cursor.execute(sqlStr)
+	
+	cursorTuples = list(cursor)
+	for row in cursorTuples:
+		#TODO Better formatting.
+		print(row)
 
 
 #Prints out the total independent, and dependent students, per state, in the
@@ -170,10 +205,17 @@ def main():
 		elif option == "Help":
 			help()
 
+		elif "Qtr" in option:
+			qtrNum = option[-1]
+			qtrYears(qtrNum)
+
 		elif option == "Exit":
 			print("Goodbye!")
 			#Note: Cleanly exits without having to import sys
 			raise SystemExit
+
+		elif option == "Total":
+			total()
 
 		else:
 			print("Please enter a valid command, or type 'Help' to view the menu again.")

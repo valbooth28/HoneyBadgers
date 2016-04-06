@@ -2,7 +2,7 @@
 Program: filter.py
 Author: Val Booth <vxb4825@rit.edu>
 Purpose: Explores the FAFSA data stored in sqlite db HoneyBadgers.db.
-This filter data should be able to be ported into plotly for graphs.
+This file returns data in a form that can be used by plotly.
 
 HoneyBadgers.db has two tables of the form:
 
@@ -56,100 +56,54 @@ SQL_Q6 = " AND Qtr='Q6'"
 
 
 
-#Prints menu of available options for this program
-def help():
-	print("Your filtering options are:")
-	
-	print("'State X' will show you a breakdown of the sum of independents and ")
-	print("dependents for state with the acronym X for each year.")
-	print("")
-
-	print("'Types State X' will show you a breakdown of the sum of independents and ")
-	print("dependents for each school type in the state with the acronym X for each year.")
-	print("")
-	
-	print("'All States Y' will show you breakdown of the sum of independents")
-	print(" and dependents, per state, in Year Y.")
-	print("")
-
-	print("'Type Years' will show you the breakdown of independents and dependents")
-	print("across each school type for each year.")
-	print("")
-
-
-	print("'Qtr Years Q' will show you the breakdown of independents and dependents")
-	print("for Quarter #Q in each year where that data is available")
-	print("")
-
-	print("'Total' will show you the total sum of dependents and independents in")
-	print("in each available for full year.")
-	print("")
-	#TODO more filtering
-
-	print("'Exit' will exit the program.")
-	print("'Help' will repeat this menu.")
-
-
-
-# Shows a sum of independents and dependents, for each year, in the given state
+# Returns a sum of dependents and independents, for each year, in the given state
 def stateOnly(state):
 	#Note: input to query is of form (state,) because that converts it to a
 	#tuple, which the execute function expects even w/1 arg.
 	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS + " " + SQL_JOIN_TABLES + \
 		SQL_Q6 + " AND s.State = ? GROUP BY Year ORDER BY Year"
-	#print("sqlStr: " + sqlStr)
 	cursor.execute(sqlStr, (state,))
 	
-	cursorTuples = list(cursor)
-	for row in cursorTuples:
-		#TODO Better formatting.
-		print(row)
+	return formatForReturn(list(cursor))
+	
 
 
+#Compare dependent/independent data across the same qtr in each year, 
+#for all of the years that that Qtr exists. 2015 only has Q1-Q3
 def qtrYears(Qtr):
 	qtrStr = "Q" + Qtr
 	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS + " " + SQL_JOIN_TABLES + \
 		" AND Qtr= ? GROUP BY Year, Qtr ORDER BY Year"
-	#print(sqlStr)
 	cursor.execute(sqlStr, (qtrStr,))
 	
-	cursorTuples = list(cursor)
-	for row in cursorTuples:
-		#TODO Better formatting.
-		print(row)
+	return formatForReturn(list(cursor))
 
 
 
-
-#Shows the number of independent and dependent students for every school type,
+#Returns the number of independent and dependent students for every school type,
 #Private, public, proprietary, in the given year.
 def typePerYear():
 	sqlStr = "SELECT f.Year, s.Type, " + SQL_SUM_STUDENTS + SQL_JOIN_TABLES + \
 		SQL_Q6 + " GROUP BY Type, Year ORDER BY Year"
 	cursor.execute(sqlStr)
 	
-	cursorTuples = list(cursor)
-	for row in cursorTuples:
-		#Converting to a list so I can edit it. Types are stored as ints in the db,
-		#Making the output more readable.
-		row = list(row)
-		row[1] = typeLookup[row[1]]
-		print(row)
+	return typeFormatForReturn(list(cursor))
 
 
+
+#Returns the sum of all dependents and independents respectively, EVERYWHERE for 
+#each year
 def total():
 	sqlStr = "SELECT f.Year, " + SQL_SUM_STUDENTS + SQL_JOIN_TABLES +\
 		SQL_Q6 + " GROUP BY Year ORDER BY Year"
 	#print(sqlStr)
 	cursor.execute(sqlStr)
-	
-	cursorTuples = list(cursor)
-	for row in cursorTuples:
-		#TODO Better formatting.
-		print(row)
+
+	return formatForReturn(list(cursor))
 
 
-#Prints out the total independent, and dependent students, per state, in the
+
+#Returns the total independent, and dependent students, per state, in the
 #given year
 def allStatesYear(year):
 	#Note: input to query is of form (year,) because that converts it to a
@@ -158,66 +112,68 @@ def allStatesYear(year):
 		SQL_Q6 + " AND f.Year = ? GROUP BY State, Year"
 	cursor.execute(sqlStr, (year,))
 
-	cursorTuples = list(cursor)
-	for row in cursorTuples:
-		print(row)
+	return formatForReturn(list(cursor))
 
 
 
-#Prints out the sum of independents and dependents, for each school type, in
+#Returns the sum of independents and dependents, for each school type, in
 #each year, for the given state.
 def typesInState(state):
 	sqlStr = "SELECT f.Year, s.Type, " + SQL_SUM_STUDENTS + SQL_JOIN_TABLES +\
 		SQL_Q6 + "AND s.State = ? GROUP BY State, Year, Type"
 	cursor.execute(sqlStr, (state,))
 
-	cursorTuples = list(cursor)
+	return typeFormatForReturn(list(cursor))
+	
+
+
+#Formats query data for use in plotly. Puts the independent variables in
+#one array and the dependents in another. Each index of the resulting arrays
+#(i.e., index 0 in each array) will correspond to the same data point.
+# Returns:
+#   xAxis - array of independent variables
+#   yAxis - array of dependent variables matching by index w/xAxis
+def formatForReturn(cursorTuples):
+	#This will contain copies of the independent variable- possibly state, year, etc.
+	xAxis = []
+	#This will contain copies of the dependent followed by independent data
+	yAxis = []
+	for row in cursorTuples:
+		#we need two copies of the independent var so both dependent and
+		#independent can reference it.
+		xAxis.extend((row[0], row[0]))
+		yAxis.extend((row[1], row[2]))
+	
+	return xAxis, yAxis
+
+
+
+#Converts type integers to their corresponding strings (1 = 'Public', etc)
+#before putting it in proper x/y axis format in plotly.
+# Returns: an array of tuples where each index is of format: (year, xAxis, yAxis)
+def typeFormatForReturn(cursorTuples):
+	#This will contain copies of type as a string ('Private', 'Public', etc.)
+	xAxis = []
+	#This will contain copies of the dependent followed by independent data
+	yAxis = [] 	
+
+	allYears = []
+	
 	for row in cursorTuples:
 		#Converting to a list so I can edit it. Types are stored as ints in the db,
 		#Making the output more readable.
 		row = list(row)
-		row[1] = typeLookup[row[1]]
-		print(row)
+		typeNum = row[1]
+		typeStr = typeLookup[row[1]]
+		xAxis.extend((typeStr, typeStr))
+		yAxis.extend((row[2], row[3]))
+
+		#Each year has a row for types 1, 2, 3. If the type is currently 3,
+		#we're done w/this year and can add it to all years/reset x and y
+		if typeNum == 3:
+			allYears.append((row[0], xAxis,yAxis))
+			xAxis = []
+			yAxis = []
 
 
-
-def main():
-	print("Welcome to filter.py!")
-	help()
-
-	while True:
-		option = input("Enter what you'd like to filter by: ")
-		if "All State" in option:
-			year = option[-4:]
-			allStatesYear(year)
-
-		elif "Types State" in option:
-			state = option[-2:]
-			typesInState(state)
-			
-		elif "State" in option:
-			state = option[-2:]
-			stateOnly(state)
-
-		elif "Type" in option:
-			typePerYear()
-
-		elif option == "Help":
-			help()
-
-		elif "Qtr" in option:
-			qtrNum = option[-1]
-			qtrYears(qtrNum)
-
-		elif option == "Exit":
-			print("Goodbye!")
-			#Note: Cleanly exits without having to import sys
-			raise SystemExit
-
-		elif option == "Total":
-			total()
-
-		else:
-			print("Please enter a valid command, or type 'Help' to view the menu again.")
-
-main()
+	return allYears

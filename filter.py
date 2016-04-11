@@ -83,10 +83,11 @@ def qtrYears(Qtr):
 #Returns the number of independent and dependent students for every school type,
 #Private, public, proprietary, in the given year.
 def typePerYear():
+
 	sqlStr = "SELECT f.Year, s.Type, " + SQL_SUM_STUDENTS + SQL_JOIN_TABLES + \
 		SQL_Q6 + " GROUP BY Type, Year ORDER BY Year"
 	cursor.execute(sqlStr)
-	
+
 	return typeFormatForReturn(list(cursor))
 
 
@@ -177,3 +178,27 @@ def typeFormatForReturn(cursorTuples):
 
 
 	return allYears
+
+#Get the names of all states in the database
+#Returns: A list of two character strings of the states
+def allStateNames():
+	sqlStr = "SELECT DISTINCT state FROM School ORDER BY state"
+	cursor.execute(sqlStr)
+
+	res = list(cursor)
+	ret = []
+	for state in res:
+		ret.append(state[0])
+
+	return ret
+
+
+def allYears():
+	sqlStr = "SELECT DISTINCT year FROM FAFSA_Data ORDER BY year"
+	cursor.execute(sqlStr)
+
+	res = list(cursor)
+	ret = []
+	for year in res:
+                ret.append(str(year[0]))
+	return ret

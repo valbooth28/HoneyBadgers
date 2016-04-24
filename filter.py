@@ -51,6 +51,7 @@ cursor = conn.cursor()
 
 #Sql components that are common across queries
 SQL_SUM_STUDENTS = "SUM(f.Y_Dependent) AS allDependents, SUM(f.Y_Independent) as allIndependents"
+SQL_SUM_STUDENTS_PER_QUARTER = "SUM(f.Q_Dependent) AS allDependents, SUM(f.Q_Independent) as allIndependents"
 SQL_JOIN_TABLES = " FROM FAFSA_Data AS f INNER JOIN School s ON f.OPE_ID=s.OPE_ID"
 SQL_Q6 = " AND Qtr='Q6'"
 
@@ -72,7 +73,7 @@ def stateOnly(state):
 #for all of the years that that Qtr exists. 2015 only has Q1-Q3
 def qtrYears(Qtr):
 	qtrStr = "Q" + Qtr
-	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS + " " + SQL_JOIN_TABLES + \
+	sqlStr = "SELECT f.Year AS YEAR, " + SQL_SUM_STUDENTS_PER_QUARTER + " " + SQL_JOIN_TABLES + \
 		" AND Qtr= ? GROUP BY Year, Qtr ORDER BY Year"
 	cursor.execute(sqlStr, (qtrStr,))
 	

@@ -19,6 +19,7 @@ titleFont=dict(
     size=20,
     color='#7f7f7f'
 )
+
 def plotByState(xData,yData,state):
 
     depDataX = []
@@ -223,6 +224,7 @@ def plotTypePerYear(xData,yData):
 
     return plot(plotData)
 
+
 def plotQuarters(xData,yData,quarter):
     depDataX = []
     indepDataX = []
@@ -261,7 +263,53 @@ def plotQuarters(xData,yData,quarter):
 
     return plot(plotData)
 
+def plotCompareStates(xDataA,yDataA,xDataB,yDataB,stateA,stateB):
+    depDataX = []
+    indepDataX = []
+    depDataY = []
+    indepDataY = []
 
+    #Messy code - Check, Doesn't scale - Check
+    depDataX.append((stateA + "-" + str(xDataA[0])))
+    depDataX.append((stateB + "-" + str(xDataB[0])))
+    depDataX.append((stateA + "-" + str(xDataA[2])))
+    depDataX.append((stateB + "-" + str(xDataB[2])))
+    indepDataX.append((stateA + "-" + str(xDataA[1])))
+    indepDataX.append((stateB + "-" + str(xDataB[1])))
+    indepDataX.append((stateA + "-" + str(xDataA[3])))
+    indepDataX.append((stateB + "-" + str(xDataB[3])))
+
+    depDataY.append(yDataA[0])
+    depDataY.append(yDataB[0])
+    depDataY.append(yDataA[2])
+    depDataY.append(yDataB[2])
+    indepDataY.append(yDataA[1])
+    indepDataY.append(yDataB[1])
+    indepDataY.append(yDataA[3])
+    indepDataY.append(yDataB[3])
+
+    plotData = {
+        "data": [
+            Bar(x=depDataX, y=depDataY, name="Dependent"),
+            Bar(x=indepDataX, y=indepDataY, name="Independent")
+
+        ],
+        "layout": Layout(
+            title=stateA + " vs " + stateB + " by Year",
+            font=titleFont,
+            xaxis=dict(title="State-Year",
+                       titlefont=tf,
+            ),
+            yaxis=dict(title="Number of students",
+                       titlefont=tf
+            ),
+            barmode='group'
+        )}
+
+    return plot(plotData)
+    
+#Make a graph from the input data
+#Return html string for gui
 def plot(plotData):
     return plotly.offline.plot(plotData, show_link=False, output_type='div')
 

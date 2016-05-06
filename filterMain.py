@@ -36,7 +36,25 @@ def help():
 	print("in each available for full year.")
 	print("")
 	
-	#TODO more filtering?
+	#region()
+	print("'Region R' will show you the breakdown of dependents and independents")
+	print("for region 'R' in every year.")
+	print("")
+	
+	#allRegions()
+	print("'All Regions' will show you the breakdown of dependents and independents")
+	print("in every region for every year.")
+	print("")
+	
+	#typesInRegion()
+	print("'Types Region R' shows the number of dependents and independents, who applied")
+	print("to each school type, in region R, in every year.")
+	print("")
+	
+	#allRegionsType()
+	print("'Types All Regions Y' shows the number of dependents and independents, in every")
+	print("region, who applied to different school types, in year Y")
+	print("")
 
 	print("'Exit' will exit the program.")
 	print("'Help' will repeat this menu.")
@@ -64,6 +82,28 @@ def main():
 			#We had our custom printing above, no need to print again
 			queryCommand = False
 			
+		elif "All Regions" == option:
+			allReg = allRegions()
+			typePrint(allReg)
+
+			#We had our custom printing above, no need to print again
+			queryCommand = False
+
+		elif "Types Region" in option:
+			reg = option[13:]
+			typeRegions = typesInRegion(reg)
+			typePrint(typeRegions)
+
+			#We had our custom printing above, no need to print again
+			queryCommand = False
+
+		elif "Types All Regions" in option:
+			year = option[-4:]
+			allRegType = allRegionsType(year)
+			typePrint(allRegType)
+
+			#We had our custom printing above, no need to print again
+			queryCommand = False
 
 		elif "State" in option:
 			state = option[-2:]
@@ -77,6 +117,10 @@ def main():
 			#We had our custom printing above, no need to print again
 			queryCommand = False
 
+		elif "Region" in option:
+			reg = option[7:]
+			xAxis, yAxis = region(reg)
+			
 
 		elif option == "Help":
 			queryCommand = False

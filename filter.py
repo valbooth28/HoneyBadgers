@@ -59,6 +59,7 @@ cursor = conn.cursor()
 
 #Sql components that are common across queries
 SQL_SUM_STUDENTS = "SUM(f.Y_Dependent) AS allDependents, SUM(f.Y_Independent) as allIndependents"
+SQL_SUM_STUDENTS_PER_QUARTER = "SUM(f.Q_Dependent) AS allDependents, SUM(f.Q_Independent) as allIndependents"
 SQL_JOIN_TABLES = " FROM FAFSA_Data AS f INNER JOIN School s ON f.OPE_ID=s.OPE_ID"
 SQL_Q6 = " Qtr='Q6'"
 
@@ -87,7 +88,6 @@ def stateOnly(state):
 	cursor.execute(sqlStr, (state,))
 	
 	return formatForReturn(list(cursor))
-	
 
 
 #Returns the sum of independents and dependents, for each school type, in
@@ -97,7 +97,7 @@ def typesInState(state):
 		" WHERE " + SQL_Q6 + "AND s.State = ? GROUP BY State, Year, Type"
 	cursor.execute(sqlStr, (state,))
 
-	return typeFormatForReturn(list(cursor))
+	return lookupFormatReturn("type",list(cursor))
 
 
 
@@ -217,7 +217,7 @@ def typePerYear():
 		" WHERE " + SQL_Q6 + " GROUP BY Type, Year ORDER BY Year"
 	cursor.execute(sqlStr)
 
-	return typeFormatForReturn(list(cursor))
+	return lookupFormatReturn("type",list(cursor))
 
 
 def regStrToNum(rStr):

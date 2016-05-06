@@ -20,7 +20,8 @@ Mode = {
     1 : "All States",
     2 : "Type Years",
     3 : "Quarter Years",
-    4 : "Total"
+    4 : "Total",
+    5 : "Compare States"
 }
 
 class MainWindow(QMainWindow):
@@ -51,6 +52,17 @@ class MainWindow(QMainWindow):
         #Qtr Years
         self.quartersCombo = QComboBox(self)
         self.quartersCombo.addItems(['1','2','3','4','5','6'])
+
+        #Compare States
+        self.stateALabel = QLabel("State A: ", self)
+        self.stateACombo = QComboBox(self)
+        self.stateACombo.addItems(allStateNames())
+        self.stateALabelSpacer = QLabel(" ", self)
+        self.stateBLabel = QLabel("State B: ", self)
+        self.stateBCombo = QComboBox(self)
+        self.stateBCombo.addItems(allStateNames())
+        
+        
         
         self.graphBtn = QPushButton("Graph", self)
         self.graphBtn.clicked.connect(self.graph)
@@ -66,6 +78,11 @@ class MainWindow(QMainWindow):
         self.typesCheckBoxAction = self.toolbar.addWidget(self.typesCheckBox)
         self.yearComboAction = self.toolbar.addWidget(self.yearCombo)
         self.quartersComboAction = self.toolbar.addWidget(self.quartersCombo)
+        self.stateALabelAction = self.toolbar.addWidget(self.stateALabel)
+        self.stateAComboAction = self.toolbar.addWidget(self.stateACombo)
+        self.stateALabelSpacerAction = self.toolbar.addWidget(self.stateALabelSpacer)
+        self.stateBLabelAction =  self.toolbar.addWidget(self.stateBLabel)
+        self.stateBComboAction = self.toolbar.addWidget(self.stateBCombo)
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.graphBtn)
         self.setCentralWidget(self.view)
@@ -108,6 +125,15 @@ class MainWindow(QMainWindow):
         elif mode == 4:
             xData,yData = total()
             newGraph = plot.plotTotal(xData,yData)
+            
+        #Compare States
+        elif mode == 5:
+            stateA = self.stateACombo.currentText()
+            stateB = self.stateBCombo.currentText()
+            xDataA,yDataA = stateOnly(stateA)
+            xDataB,yDataB = stateOnly(stateB)
+            newGraph = plot.plotCompareStates(xDataA,yDataA,xDataB,yDataB,stateA,stateB)
+            
         else:               
             return
 
@@ -117,45 +143,64 @@ class MainWindow(QMainWindow):
     def switchMode(self, mode):
         #Individual State
         if mode == 0:
-            self.yearComboAction.setVisible(False)
-            self.quartersComboAction.setVisible(False)
-            self.stateLabelAction.setVisible(True)
-            self.stateComboAction.setVisible(True)
-            self.stateLabelSpacerAction.setVisible(True)
-            self.typesCheckBoxAction.setVisible(True)
-
-            self.typesCheckBox.setChecked(False)
-            self.stateCombo.setCurrentIndex(0)
+            self.setStateMode(True)
+            self.setAllStatesMode(False)
+            self.setQuarterYearsMode(False)
+            self.setCompareStatesMode(False)
+            
         #All States
-        elif mode == 1:
-            self.stateComboAction.setVisible(False)
-            self.stateLabelAction.setVisible(False)
-            self.typesCheckBoxAction.setVisible(False)
-            self.stateLabelSpacerAction.setVisible(False)
-            self.quartersComboAction.setVisible(False)
-            self.yearComboAction.setVisible(True)
+        elif mode == 1:      
+            self.setStateMode(False)
+            self.setAllStatesMode(True)
+            self.setQuarterYearsMode(False)
+            self.setCompareStatesMode(False)
 
         #Type Years or Total
         elif mode == 2 or mode == 4:
-            self.stateComboAction.setVisible(False)
-            self.typesCheckBoxAction.setVisible(False)
-            self.stateLabelAction.setVisible(False)
-            self.yearComboAction.setVisible(False)
-            self.stateLabelSpacerAction.setVisible(False)
-            self.quartersComboAction.setVisible(False)
-            self.quartersComboAction.setVisible(False)
+            self.setStateMode(False)
+            self.setAllStatesMode(False)
+            self.setQuarterYearsMode(False)
+            self.setCompareStatesMode(False)
 
         #Quarters
         elif mode == 3:
-            self.stateComboAction.setVisible(False)
-            self.typesCheckBoxAction.setVisible(False)
-            self.stateLabelAction.setVisible(False)
-            self.yearComboAction.setVisible(False)
-            self.stateLabelSpacerAction.setVisible(False)
-            self.quartersComboAction.setVisible(False)
-            self.quartersComboAction.setVisible(True)
+            self.setStateMode(False)
+            self.setAllStatesMode(False)
+            self.setQuarterYearsMode(True)
+            self.setCompareStatesMode(False)
 
-            self.quartersCombo.setCurrentIndex(0)
+        #Comparse States
+        elif mode == 5:
+            self.setStateMode(False)
+            self.setAllStatesMode(False)
+            self.setQuarterYearsMode(False)
+            self.setCompareStatesMode(True)
+
+
+    #Setup the toolbar for each mode
+    def setQuarterYearsMode(self, b):
+        self.quartersComboAction.setVisible(b)
+        self.quartersCombo.setCurrentIndex(0)
+
+    def setAllStatesMode(self, b):
+        self.yearComboAction.setVisible(b)
+        self.stateCombo.setCurrentIndex(0)
+
+    def setStateMode(self, b):
+        self.stateLabelAction.setVisible(b)
+        self.stateComboAction.setVisible(b)
+        self.stateLabelSpacerAction.setVisible(b)
+        self.typesCheckBoxAction.setVisible(b)
+        self.typesCheckBox.setChecked(False)
+
+    def setCompareStatesMode(self, b):
+        self.stateALabelAction.setVisible(b)
+        self.stateAComboAction.setVisible(b)
+        self.stateALabelSpacerAction.setVisible(b)
+        self.stateBLabelAction.setVisible(b)
+        self.stateBComboAction.setVisible(b)
+        self.stateACombo.setCurrentIndex(0)
+        self.stateBCombo.setCurrentIndex(0)
 
     #Set up the graph mode combo box
     def setupGraphCombo(self):

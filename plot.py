@@ -14,7 +14,11 @@ tf=dict(
     size=28,
     color='#7f7f7f'
 )
-
+titleFont=dict(
+    family='Courier New, monospace',
+    size=20,
+    color='#7f7f7f'
+)
 
 def plotByState(xData,yData,state):
 
@@ -34,11 +38,6 @@ def plotByState(xData,yData,state):
         else:
             indepDataY.append(yData[i])
 
-            #Scatter(x=indepDataX, y=indepDataY, mode='markers',
-             #       marker=dict(size=12, line=dict(width=1)), name="Independent")
-            #Scatter(x=depDataX, y=depDataY, mode='markers',
-            #    marker=dict(size=12, line=dict(width=1)), name="Dependent"),
-
     plotData = {
         "data": [
 
@@ -48,10 +47,9 @@ def plotByState(xData,yData,state):
         ],
         "layout": Layout(
             title="Dependents and Independents in "+state+" by Year",
+            font=titleFont,
             xaxis=dict(title="Year",
                        titlefont=tf,
-                       tickvals=[2012,2013,2014,2015],
-                       range=[2012,2015]
             ),
             yaxis=dict(title="Number of students",
                        titlefont=tf
@@ -94,10 +92,9 @@ def plotByStateType(xData,yData,state):
         ],
         "layout": Layout(
             title="Dependents and Independents with School Type in "+state+" by Year",
+            font=titleFont,
             xaxis=dict(title="Year",
                        titlefont=tf,
-                       tickvals=[2012,2013,2014,2015],
-                       range=[2012,2015]
             ),
             yaxis=dict(title="Number of students",
                        titlefont=tf
@@ -130,6 +127,7 @@ def plotAllStates(xData,yData,year):
         ],
         "layout": Layout(
             title="Dependents and Independents in "+year+" by State",
+            font=titleFont,
             xaxis=dict(title="State",
                        titlefont=tf
             ),
@@ -169,10 +167,9 @@ def plotTotal(xData,yData):
         ],
         "layout": Layout(
             title="Total Dependents and Independents by Year",
+            font=titleFont,
             xaxis=dict(title="Year",
                        titlefont=tf,
-                       tickvals=[2012,2013,2014,2015],
-                       range=[2012,2015]
             ),
             yaxis=dict(title="Number of students",
                        titlefont=tf
@@ -214,10 +211,9 @@ def plotTypePerYear(xData,yData):
         ],
         "layout": Layout(
             title="Total Dependents and Independents with School Type by Year",
+            font=titleFont,
             xaxis=dict(title="Year",
                        titlefont=tf,
-                       tickvals=[2012,2013,2014,2015],
-                       range=[2012,2015]
             ),
             yaxis=dict(title="Number of students",
                        titlefont=tf
@@ -227,6 +223,7 @@ def plotTypePerYear(xData,yData):
     }
 
     return plot(plotData)
+
 
 def plotQuarters(xData,yData,quarter):
     depDataX = []
@@ -254,10 +251,9 @@ def plotQuarters(xData,yData,quarter):
         ],
         "layout": Layout(
             title="Total Dependents and Independents in Quarter "+quarter+" by Year",
+            font=titleFont,
             xaxis=dict(title="Year",
                        titlefont=tf,
-                       tickvals=[2012,2013,2014,2015,2016],
-                       range=[2012,2016]
             ),
             yaxis=dict(title="Number of students",
                        titlefont=tf
@@ -267,59 +263,54 @@ def plotQuarters(xData,yData,quarter):
 
     return plot(plotData)
 
+def plotCompareStates(xDataA,yDataA,xDataB,yDataB,stateA,stateB):
+    depDataX = []
+    indepDataX = []
+    depDataY = []
+    indepDataY = []
 
+    #Messy code - Check, Doesn't scale - Check
+    depDataX.append((stateA + "-" + str(xDataA[0])))
+    depDataX.append((stateB + "-" + str(xDataB[0])))
+    depDataX.append((stateA + "-" + str(xDataA[2])))
+    depDataX.append((stateB + "-" + str(xDataB[2])))
+    indepDataX.append((stateA + "-" + str(xDataA[1])))
+    indepDataX.append((stateB + "-" + str(xDataB[1])))
+    indepDataX.append((stateA + "-" + str(xDataA[3])))
+    indepDataX.append((stateB + "-" + str(xDataB[3])))
+
+    depDataY.append(yDataA[0])
+    depDataY.append(yDataB[0])
+    depDataY.append(yDataA[2])
+    depDataY.append(yDataB[2])
+    indepDataY.append(yDataA[1])
+    indepDataY.append(yDataB[1])
+    indepDataY.append(yDataA[3])
+    indepDataY.append(yDataB[3])
+
+    plotData = {
+        "data": [
+            Bar(x=depDataX, y=depDataY, name="Dependent"),
+            Bar(x=indepDataX, y=indepDataY, name="Independent")
+
+        ],
+        "layout": Layout(
+            title=stateA + " vs " + stateB + " by Year",
+            font=titleFont,
+            xaxis=dict(title="State-Year",
+                       titlefont=tf,
+            ),
+            yaxis=dict(title="Number of students",
+                       titlefont=tf
+            ),
+            barmode='group'
+        )}
+
+    return plot(plotData)
+    
+#Make a graph from the input data
+#Return html string for gui
 def plot(plotData):
     return plotly.offline.plot(plotData, show_link=False, output_type='div')
-
-
-##def plotGraphC(xData,yData):
-##
-## 
-##    return plotly.offline.plot({
-##    "data": [
-##        Scatter(x=xData, y=yData,  mode = 'markers'),
-##    ],
-##    "layout": Layout(
-##        title='Dependent Rate vs Time',
-##        xaxis=dict(
-##            title='2013 Quarter',
-##            titlefont=tf
-##        ),
-##        yaxis=dict(
-##            title='Dependent Rate',
-##            titlefont=tf
-##        )
-##    )
-##    }, show_link=False, output_type='div')
-##
-##
-##
-##
-##def plotGraphA():
-##    return plotly.offline.plot({
-##    "data": [
-##        Scatter(x=[1, 2, 3, 4, 5, 6], y=[0.416, 0.391, 0.373, 0.367, 0.361, 0.358],  mode = 'markers'),
-##        Scatter(x=[1,6], y=[.408,.352])
-##    ],
-##    "layout": Layout(
-##        title='Dependent Rate vs Time',
-##        xaxis=dict(
-##            title='2013 Quarter',
-##            titlefont=dict(
-##                family='Courier New, monospace',
-##                size=18,
-##                color='#7f7f7f'
-##            )
-##        ),
-##        yaxis=dict(
-##            title='Dependent Rate',
-##            titlefont=dict(
-##                family='Courier New, monospace',
-##                size=18,
-##                color='#7f7f7f'
-##            )
-##        )
-##    )
-##    }, show_link=False, output_type='div')
 
 

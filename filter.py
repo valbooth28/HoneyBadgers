@@ -132,6 +132,7 @@ def region(reg):
 
 # Returns all of the dependents and independents, for each year, grouped by 
 # geographical region
+# Returns: an array of tuples where each index is of format: (year, xAxis, yAxis)
 def allRegions():
 	#NOTE: Add "AND Region <> 6" if you only want US
 	#likewise "<> 5" for only continuous US
@@ -146,6 +147,7 @@ def allRegions():
 # Returns all of the dependent and independents, for each year, grouped by school
 # type, in a particular region
 # region - string representing the region name, should match lookup table
+# Returns: an array of tuples where each index is of format: (region, xAxis, yAxis)
 def typesInRegion(region):
 	regionTable = lookup["region"]
 	#Looks up the key integer for the region string value

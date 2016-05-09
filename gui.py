@@ -21,8 +21,10 @@ Mode = {
     2 : "Type Years",
     3 : "Quarter Years",
     4 : "Total",
-    5 : "Compare States"
+    5 : "Compare States",
+    6 : "Regions"
 }
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -61,7 +63,11 @@ class MainWindow(QMainWindow):
         self.stateBLabel = QLabel("State B: ", self)
         self.stateBCombo = QComboBox(self)
         self.stateBCombo.addItems(allStateNames())
-        
+
+        #Regions
+        self.regionLabel = QLabel("Region: ", self)
+        self.regionCombo = QComboBox(self)
+        self.regionCombo.addItems(self.setupRegionCombo())
         
         
         self.graphBtn = QPushButton("Graph", self)
@@ -81,8 +87,11 @@ class MainWindow(QMainWindow):
         self.stateALabelAction = self.toolbar.addWidget(self.stateALabel)
         self.stateAComboAction = self.toolbar.addWidget(self.stateACombo)
         self.stateALabelSpacerAction = self.toolbar.addWidget(self.stateALabelSpacer)
-        self.stateBLabelAction =  self.toolbar.addWidget(self.stateBLabel)
+        self.stateBLabelAction = self.toolbar.addWidget(self.stateBLabel)
         self.stateBComboAction = self.toolbar.addWidget(self.stateBCombo)
+        self.regionLabelAction = self.toolbar.addWidget(self.regionLabel)
+        self.regionComboAction = self.toolbar.addWidget(self.regionCombo)
+        
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.graphBtn)
         self.setCentralWidget(self.view)
@@ -133,6 +142,12 @@ class MainWindow(QMainWindow):
             xDataA,yDataA = stateOnly(stateA)
             xDataB,yDataB = stateOnly(stateB)
             newGraph = plot.plotCompareStates(xDataA,yDataA,xDataB,yDataB,stateA,stateB)
+
+        #Region
+        elif mode == 6:
+            r = self.regionCombo.currentText()
+            xData,yData = region(r)
+            newGraph = plot.plotRegion(xData,yData,r)
             
         else:               
             return
@@ -147,6 +162,7 @@ class MainWindow(QMainWindow):
             self.setAllStatesMode(False)
             self.setQuarterYearsMode(False)
             self.setCompareStatesMode(False)
+            self.setRegionMode(False)
             
         #All States
         elif mode == 1:      
@@ -154,6 +170,7 @@ class MainWindow(QMainWindow):
             self.setAllStatesMode(True)
             self.setQuarterYearsMode(False)
             self.setCompareStatesMode(False)
+            self.setRegionMode(False)
 
         #Type Years or Total
         elif mode == 2 or mode == 4:
@@ -161,6 +178,7 @@ class MainWindow(QMainWindow):
             self.setAllStatesMode(False)
             self.setQuarterYearsMode(False)
             self.setCompareStatesMode(False)
+            self.setRegionMode(False)
 
         #Quarters
         elif mode == 3:
@@ -168,6 +186,7 @@ class MainWindow(QMainWindow):
             self.setAllStatesMode(False)
             self.setQuarterYearsMode(True)
             self.setCompareStatesMode(False)
+            self.setRegionMode(False)
 
         #Comparse States
         elif mode == 5:
@@ -175,9 +194,22 @@ class MainWindow(QMainWindow):
             self.setAllStatesMode(False)
             self.setQuarterYearsMode(False)
             self.setCompareStatesMode(True)
+            self.setRegionMode(False)
+
+        elif mode == 6:
+            self.setStateMode(False)
+            self.setAllStatesMode(False)
+            self.setQuarterYearsMode(False)
+            self.setCompareStatesMode(False)
+            self.setRegionMode(True)
 
 
     #Setup the toolbar for each mode
+    def setRegionMode(self, b):
+        self.regionLabelAction.setVisible(b)
+        self.regionComboAction.setVisible(b)
+        self.regionCombo.setCurrentIndex(0)
+            
     def setQuarterYearsMode(self, b):
         self.quartersComboAction.setVisible(b)
         self.quartersCombo.setCurrentIndex(0)
@@ -204,9 +236,10 @@ class MainWindow(QMainWindow):
 
     #Set up the graph mode combo box
     def setupGraphCombo(self):
-        ret = []
-        for mode in Mode:
-            ret.append(Mode[mode])
-        return ret
+        return list(Mode.values())
+
+
+    def setupRegionCombo(self):
+        return list(lookup["region"].values())
 
 

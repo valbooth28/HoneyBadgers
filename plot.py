@@ -307,7 +307,42 @@ def plotCompareStates(xDataA,yDataA,xDataB,yDataB,stateA,stateB):
         )}
 
     return plot(plotData)
-    
+
+def plotRegion(xData,yData,region):
+    depDataX = []
+    depDataY = []
+    indepDataX = []
+    indepDataY = []  
+
+    for i in range(len(xData)):
+        if i % 2 == 0:
+            depDataX.append(xData[i])
+            depDataY.append(yData[i])
+        else:
+            indepDataX.append(xData[i])
+            indepDataY.append(yData[i])
+
+    plotData = {
+        "data": [
+            Bar(x=depDataX, y=depDataY, name="Dependent"),
+            Bar(x=indepDataX, y=indepDataY, name="Independent")
+        ],
+        "layout": Layout(
+            title="Dependents and Independents in "+region+" by Year",
+            font=titleFont,
+            xaxis=dict(title="Year",
+                       titlefont=tf
+            ),
+            yaxis=dict(title="Number of students",
+                       titlefont=tf
+            ),
+            barmode='group'
+        )
+    }
+
+    return plot(plotData)
+
+
 #Make a graph from the input data
 #Return html string for gui
 def plot(plotData):
